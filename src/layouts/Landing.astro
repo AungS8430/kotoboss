@@ -1,0 +1,24 @@
+---
+import Base from "./Base.astro";
+import Navbar from "../components/Navbar.astro";
+import { getSession } from 'auth-astro/server';
+
+const session = await getSession(Astro.request)
+
+---
+
+<Base>
+	<div class="bg-base-200 flex flex-col">
+		<Navbar />
+		<slot class="grow shrink-1 basis-auto" />
+	</div>
+	<script src="../scripts/auth.ts" />
+</Base>
+
+<!-- {session ? (
+	
+) : (
+	<script>
+		window.location.replace("/")
+	</script>
+)} -->

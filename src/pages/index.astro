@@ -1,16 +1,22 @@
 ---
+import Landing from "../layouts/Landing.astro"
+import Default from "../layouts/Default.astro";
+import { getSession } from 'auth-astro/server';
 
+const session = await getSession(Astro.request)
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+
+{!session ? (
+	<Landing>
+		<div class="flex items-center justify-center h-nonav flex flex-col gap-0 gap-5">
+			<h1 class="text-4xl lg:text-6xl px-5 lg:p-0 font-black text-base-content text-center">Memorize vocabularies on the go!</h1>
+			<h2 class="text-lg lg:text-3xl px-5 lg:p-0 font-bold text-base-content text-center">Kotoboss, an online Anki deck compatible flashcard app.</h2>
+			<a class="btn btn-soft btn-primary btn-md lg:btn-lg login">Try Kotoboss</a>
+		</div>
+	</Landing>
+) : (
+	<Default>
+		
+	</Default>
+)}
