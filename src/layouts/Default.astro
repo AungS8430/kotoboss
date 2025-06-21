@@ -4,7 +4,10 @@ import Menu from "../components/Menu.astro"
 ---
 
 <Base>
-  <div class="bg-base-200 h-screen">
+  <div class="flex bg-base-200 h-screen">
     <Menu />
+    <div class="p-8 pt-20 lg:p-8 place-content-center w-full">
+      <slot />
+    </div>
   </div>
 </Base>
