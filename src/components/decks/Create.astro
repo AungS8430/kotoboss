@@ -1,0 +1,22 @@
+---
+export const prerender = false;
+import { db, Deck } from "astro:db"
+import { getSession } from "auth-astro/server"
+import { actions } from "astro:actions"
+const session = await getSession(Astro.request)
+
+---
+
+<dialog id="modal_create" class="modal">
+  <div class="modal-box">
+    <a class="font-bold text-lg">Create a deck</a>
+    <form class="create-deck-form" action={actions.createDeck} method="POST">
+      <fieldset class="fieldset w-full">
+        <label class="label">Name</label>
+        <input type="text" class="input w-full" placeholder="Type here" name="name" />
+        <input value={session?.user?.email} type="hidden" name="user" />
+        <input type="submit" value="submit" class="btn btn-primary" />
+      </fieldset>
+    </form>
+  </div>
+</dialog>

@@ -1,15 +1,33 @@
 ---
-import { db, Deck, eq } from "astro:db"
+import { db, Deck, Card, eq } from "astro:db"
 import { getSession } from "auth-astro/server"
+import { actions } from "astro:actions"
+import Create from "./Create.astro"
 
 const session = await getSession(Astro.request)
+const res = await Astro.getActionResult(actions.createDeck);
 
-let decks = await db.select().from(Deck).where(eq(Deck.user, session?.user?.email))
+let decks = null
+
+async function fetch() {
+  decks = await db.select().from(Deck).where(eq(Deck.user, session?.user?.email))
+  for (let i = 0; i < decks.length; i++) {
+    let cards = await db.select().from(Card).where(eq(Card.deck, decks[i].id))
+    decks[i].new = cards.filter(card => card.state === 0).length
+    decks[i].learn = cards.filter(card => card.state === (1 || 3)).length
+    decks[i].review = cards.filter(cards => cards.state === 2).length
+  }
+}
+await fetch()
+
+if (res && !res.error) {
+  await fetch()
+}
 ---
 
-<div class="list bg-base-100 rounded-box shadow-md w-xl m-auto p-2 pb-4">
+<div class="list bg-base-100 rounded-box shadow-md sm:w-xl m-auto p-2 pb-4">
   <a class="font-semibold text-lg pt-4 pl-4">Decks</a>
-  <table class="table">
+  <table class="table table-sm sm:table-md">
     <thead>
       <tr>
         <td>Name</td>
@@ -23,16 +41,17 @@ let decks = await db.select().from(Deck).where(eq(Deck.user, session?.user?.emai
         decks.map((deck) =>
           <tr class="hover:bg-base-300 cursor-pointer" onclick={`window.location.assign("/deck/${deck.id}")`}>
             <td>{deck.name}</td>
-            <td>19</td>
-            <td class="text-warning">2</td>
-            <td class="text-success">39</td>
+            <td>{deck.new}</td>
+            <td class="text-warning">{deck.learn}</td>
+            <td class="text-success">{deck.review}</td>
           </tr>          
         )
       }
     </tbody>
   </table>
-  <a href="/create" class="btn">
+  <button class="btn" onclick="modal_create.showModal()">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21q-.425 0-.712-.288T11 20v-7H4q-.425 0-.712-.288T3 12t.288-.712T4 11h7V4q0-.425.288-.712T12 3t.713.288T13 4v7h7q.425 0 .713.288T21 12t-.288.713T20 13h-7v7q0 .425-.288.713T12 21"/></svg>
     Add
-  </a>
+  </button>
+  <Create />
 </div>

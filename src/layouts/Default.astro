@@ -1,9 +1,14 @@
 ---
 import Base from "./Base.astro"
 import Menu from "../components/Menu.astro"
+import { getSession } from "auth-astro/server"
+
+const session = JSON.stringify(await getSession(Astro.request))
+
 ---
 
 <Base>
+  <data data-session={session} id="session" />
   <div class="flex bg-base-200 h-screen">
     <Menu />
     <div class="p-8 pt-20 lg:p-8 place-content-center w-full">

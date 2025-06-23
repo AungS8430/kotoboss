@@ -2,7 +2,8 @@ import { defineDb, defineTable, column } from 'astro:db';
 
 const Card = defineTable({
   columns: {
-    id: column.number({ primaryKey: true }),
+    id: column.number(),
+    deck: column.number(),
     difficulty: column.number(),
     due: column.date(),
     elapsed_days: column.number(),
@@ -13,7 +14,7 @@ const Card = defineTable({
     scheduled_days: column.number(),
     stability: column.number(),
     state: column.number(),
-    media: column.text()
+    media: column.text({ optional: true })
   }
 })
 
