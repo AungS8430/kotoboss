@@ -9,14 +9,20 @@ const session = await getSession(Astro.request)
 
 <dialog id="modal_create" class="modal">
   <div class="modal-box">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
     <a class="font-bold text-lg">Create a deck</a>
     <form class="create-deck-form" action={actions.createDeck} method="POST">
       <fieldset class="fieldset w-full">
         <label class="label">Name</label>
-        <input type="text" class="input w-full" placeholder="Type here" name="name" />
+        <input type="text" class="input w-full" placeholder="Type here" name="name" maxlength="40" />
         <input value={session?.user?.email} type="hidden" name="user" />
         <input type="submit" value="submit" class="btn btn-primary" />
       </fieldset>
     </form>
   </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
 </dialog>

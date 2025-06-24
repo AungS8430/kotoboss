@@ -10,6 +10,9 @@ export const server = {
       name: z.string()
     }),
     handler: async ({name, user}) => {
+      if (user && name.trim() === "") {
+        return { success: false, error: "User cannot be blank." };
+      }
       const updatedDecks = await db
         .insert(Deck)
         .values({ name: name, user: user, max_new_cards: 50, max_reviews: 500 })
