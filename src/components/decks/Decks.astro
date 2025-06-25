@@ -1,11 +1,13 @@
 ---
-import { db, Deck, Card, eq } from "astro:db"
-import { getSession } from "auth-astro/server"
-import { actions } from "astro:actions"
-import Create from "./Create.astro"
+import { db, Deck, Card, eq } from "astro:db";
+import { getSession } from "auth-astro/server";
+import { actions } from "astro:actions";
+import Create from "./Create.astro";
+import Dropdown from "./Dropdown.astro";
+import Settings from "./Settings.astro";
 
-const session = await getSession(Astro.request)
-const res = await Astro.getActionResult(actions.createDeck);
+const session = await getSession(Astro.request);
+const res = await Astro.getActionResult(actions.decks.createDeck) || await Astro.getActionResult(actions.decks.editDeck);
 
 let decks = null
 
@@ -25,26 +27,35 @@ if (res && !res.error) {
 }
 ---
 
-<div class="list bg-base-100 rounded-box shadow-md sm:w-xl m-auto p-2 pb-4">
+<div class="list bg-base-100 rounded-box shadow-md md:w-2xl m-auto p-2 pb-4">
   <a class="font-semibold text-lg pt-4 pl-4">Decks</a>
   <table class="table table-sm sm:table-md">
     <thead>
       <tr>
         <td>Name</td>
-        <td class="w-[10px]">New</td>
-        <td class="w-[10px]">Learn</td>
-        <td class="w-[10px]">Review</td>
+        <td class="w-[10px]">N<text class="hidden sm:inline">ew</text></td>
+        <td class="w-[10px]">L<text class="hidden sm:inline">earn</text></td>
+        <td class="w-[10px]">R<text class="hidden sm:inline">eview</text></td>
       </tr>
     </thead>
     <tbody>
       {
         decks.map((deck) =>
-          <tr class="hover:bg-base-300 cursor-pointer" onclick={`window.location.assign("/deck/${deck.id}")`}>
-            <td>{deck.name}</td>
-            <td>{deck.new}</td>
-            <td class="text-warning">{deck.learn}</td>
-            <td class="text-success">{deck.review}</td>
-          </tr>          
+          <tr class="hover:bg-base-300 cursor-pointer">
+            <td onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.name}</td>
+            <td onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.new}</td>
+            <td class="text-warning" onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.learn}</td>
+            <td class="text-success" onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.review}</td>
+            <td class="w-[10px] py-0!">
+              <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-square btn-sm btn-ghost sm:btn-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20q-.825 0-1.412-.587T10 18t.588-1.412T12 16t1.413.588T14 18t-.587 1.413T12 20m0-6q-.825 0-1.412-.587T10 12t.588-1.412T12 10t1.413.588T14 12t-.587 1.413T12 14m0-6q-.825 0-1.412-.587T10 6t.588-1.412T12 4t1.413.588T14 6t-.587 1.413T12 8"/></svg>
+                </summary>
+                <Dropdown deck={deck.id} />
+                <Settings deck_id={deck.id} />
+              </details>
+            </td>
+          </tr>
         )
       }
     </tbody>

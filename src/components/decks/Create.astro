@@ -13,12 +13,12 @@ const session = await getSession(Astro.request)
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
     <a class="font-bold text-lg">Create a deck</a>
-    <form class="create-deck-form" action={actions.createDeck} method="POST">
+    <form class="create-deck-form" action={actions.decks.createDeck} method="POST">
       <fieldset class="fieldset w-full">
         <label class="label">Name</label>
         <input type="text" class="input w-full" placeholder="Type here" name="name" maxlength="40" />
         <input value={session?.user?.email} type="hidden" name="user" />
-        <input type="submit" value="submit" class="btn btn-primary" />
+        <input type="submit" value="Create" class="btn btn-primary" />
       </fieldset>
     </form>
   </div>
