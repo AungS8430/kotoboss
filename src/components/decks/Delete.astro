@@ -6,6 +6,8 @@ import { getSession } from "auth-astro/server"
 import { actions } from "astro:actions"
 const session = await getSession(Astro.request)
 
+const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
+
 ---
 
 <dialog id={`modal_delete_${deck_id}`} class="modal">
@@ -13,9 +15,10 @@ const session = await getSession(Astro.request)
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
-    <a class="font-bold text-lg">Deck Settings</a>
+    <a class="font-bold text-lg">Delete {deck.name}?</a>
     <form class="delete-deck-form" action={actions.decks.deleteDeck} method="POST">
       <fieldset class="fieldset w-full">
+        <label>This action can't be undone</label>
         <input value={session?.user?.email} type="hidden" name="user" />
         <input value={deck_id} type="hidden" name="deck" />
         <input type="submit" value="Delete" class="btn btn-warning" />
