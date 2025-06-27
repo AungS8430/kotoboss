@@ -1,4 +1,4 @@
-import { db, eq, Deck } from "astro:db";
+import { db, eq, Deck, Card } from "astro:db";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -73,6 +73,7 @@ export const decks = {
           message: "Unauthorized Access."
         })
       }
+      await db.delete(Card).where(eq(Card.deck, deck))
       await db.delete(Deck).where(eq(Deck.id, deck))
       return;
     }
