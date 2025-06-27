@@ -7,7 +7,6 @@ import { actions } from "astro:actions"
 const session = await getSession(Astro.request)
 
 const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
-console.log(deck.name)
 
 ---
 
@@ -17,7 +16,7 @@ console.log(deck.name)
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
     <a class="font-bold text-lg">Deck Settings</a>
-    <form class="create-deck-form" action={actions.decks.editDeck} method="POST">
+    <form class="edit-deck-form" action={actions.decks.editDeck} method="POST">
       <fieldset class="fieldset w-full">
         <label class="label" for="name">Name</label>
         <input value={deck.name} type="text" autocomplete="off" class="input w-full" placeholder="Type here" name="name" maxlength="40" />

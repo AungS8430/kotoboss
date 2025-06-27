@@ -5,6 +5,7 @@ import { actions } from "astro:actions";
 import Create from "./Create.astro";
 import Dropdown from "./Dropdown.astro";
 import Settings from "./Settings.astro";
+import Delete from "./Delete.astro";
 
 const session = await getSession(Astro.request);
 const res = await Astro.getActionResult(actions.decks.createDeck) || await Astro.getActionResult(actions.decks.editDeck);
@@ -53,6 +54,7 @@ if (res && !res.error) {
                 </summary>
                 <Dropdown deck={deck.id} />
                 <Settings deck_id={deck.id} />
+                <Delete deck_id={deck.id} />
               </details>
             </td>
           </tr>

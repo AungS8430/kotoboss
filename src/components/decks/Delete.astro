@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 const { deck_id } = Astro.props;
-import { db, Deck } from "astro:db"
+import { db, eq, Deck } from "astro:db"
 import { getSession } from "auth-astro/server"
 import { actions } from "astro:actions"
 const session = await getSession(Astro.request)
@@ -13,12 +13,12 @@ const session = await getSession(Astro.request)
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
-    <a class="font-bold text-lg">Delete Deck</a>
+    <a class="font-bold text-lg">Deck Settings</a>
     <form class="delete-deck-form" action={actions.decks.deleteDeck} method="POST">
       <fieldset class="fieldset w-full">
-        <input value={deck_id} type="hidden" name="user" />
         <input value={session?.user?.email} type="hidden" name="user" />
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input value={deck_id} type="hidden" name="deck" />
+        <input type="submit" value="Delete" class="btn btn-warning" />
       </fieldset>
     </form>
   </div>
