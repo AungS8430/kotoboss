@@ -1,0 +1,91 @@
+---
+import { db, eq, and, Studies } from "astro:db";
+const { user, deck_id } = Astro.props;
+
+const data = await db.select().from(Studies).where(and(eq(Studies.user, user), eq(Studies.deck, deck_id)));
+
+// Build a map for quick lookup: { "YYYY-MM-DD": count }
+const dateMap: Record<string, number> = {};
+for (const row of data) {
+  dateMap[row.date.toISOString().slice(0, 10)] = row.count;
+}
+const year = new Date().getFullYear();
+const date = new Date(year, 0, 1);
+if ((date.getDay() + 6) % 7 === 0) {
+  // Do nothing or add logic here if needed
+} else if ((date.getDay() + 6) % 7 < 4) {
+  date.setDate(date.getDate() - (date.getDay() + 6) % 7)
+} else {
+  date.setDate(8 - (date.getDay() + 6) % 7)
+}
+
+let series = [
+  ...["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturday", "Sunday"].map((dayName, dayIndex) => {
+    // dayIndex: 0=Monday, ..., 6=Sunday
+    const jsDayIndex = (dayIndex) % 7;
+    // Find first occurrence of this weekday in the grid (may be last year)
+    const gridStart = new Date(year, 0, 1);
+    // Move gridStart to previous Monday (or keep if already Monday)
+    const offset = (gridStart.getDay() + 6) % 7;
+    gridStart.setDate(gridStart.getDate() - offset + 1);
+    const data = [];
+    // Always fill 53 weeks (even if last week overlaps next year)
+    for (let i = 0; i < 53; i++) {
+      const d = new Date(gridStart);
+      d.setDate(gridStart.getDate() + i * 7 + jsDayIndex);
+      const key = d.toISOString().slice(0, 10);
+      data.push({ x: key, y: dateMap[key] ?? 0 });
+    }
+    return { name: dayName, data };
+  })
+];
+
+series.reverse()
+
+const options = JSON.stringify({
+  chart: {
+    type: "heatmap",
+    height: 150,
+    background: "#1d232a",
+  },
+  stroke: {
+    show: true,
+    colors: ["#1d232a"]
+  },
+  grid: {
+    borderColor: "#000000"
+  },
+  series: series,
+  theme: {
+    mode: "dark"
+  },
+  dataLabels: {
+    enabled: false
+  },
+  yaxis: {
+    labels: {
+      show: false,
+    }
+  },
+  xaxis: {
+    labels: {
+      show: false,
+    },
+  },
+  plotOptions: {
+    heatmap: {
+      radius: 1
+    }
+  },
+  colors: ["#605dff"],
+});
+---
+<div data-options={options} class="hidden md:block">
+  <div id="heatmap-deck" />
+</div>
+<script is:inline src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script is:inline >
+  const options = JSON.parse(document.querySelector('[data-options]').getAttribute('data-options'));
+  var chart = new ApexCharts(document.querySelector("#heatmap-deck"), options);
+  chart.render();
+</script>

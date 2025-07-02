@@ -1,12 +1,22 @@
 import { defineDb, defineTable, column } from 'astro:db';
 
+const Studies = defineTable({
+  columns: {
+    deck: column.number(),
+    user: column.text(),
+    date: column.date(),
+    count: column.number(),
+    new: column.number(),
+    review: column.number()
+  }
+})
+
 const Card = defineTable({
   columns: {
     id: column.number(),
     deck: column.number(),
     difficulty: column.number(),
     due: column.date(),
-    elapsed_days: column.number(),
     lapses: column.number(),
     last_review: column.date({ optional: true }),
     learning_steps: column.number(),
@@ -30,5 +40,5 @@ const Deck = defineTable({
 
 // https://astro.build/db/config
 export default defineDb({
-  tables: { Card, Deck }
+  tables: { Card, Deck, Studies }
 });

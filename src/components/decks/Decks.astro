@@ -1,5 +1,5 @@
 ---
-import { db, Deck, Card, eq } from "astro:db";
+import { db, eq, and, Deck, Card, Studies } from "astro:db";
 import { getSession } from "auth-astro/server";
 import { actions } from "astro:actions";
 import Create from "./Create.astro";
@@ -11,14 +11,23 @@ const session = await getSession(Astro.request);
 const res = await Astro.getActionResult(actions.decks.createDeck) || await Astro.getActionResult(actions.decks.editDeck);
 
 let decks = null
+const today = new Date();
+today.setUTCHours(0, 0, 0, 0);
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+const todayStr = `${yyyy}-${mm}-${dd}`;
+
 
 async function fetch() {
   decks = await db.select().from(Deck).where(eq(Deck.user, session?.user?.email))
+  let studies = await db.select().from(Studies).where(eq(Studies.date, today))
   for (let i = 0; i < decks.length; i++) {
     let cards = await db.select().from(Card).where(eq(Card.deck, decks[i].id))
-    decks[i].new = cards.filter(card => card.state === 0).length
+    let cstudies = studies.find(s => s.deck === decks[i].id) || { new: 0, learn: 0, review: 0 }
+    decks[i].new = Math.min(decks[i].max_new_cards, cards.filter(card => card.state === 0).length) - cstudies.new
     decks[i].learn = cards.filter(card => card.state === (1 || 3)).length
-    decks[i].review = cards.filter(cards => cards.state === 2).length
+    decks[i].review = Math.min(decks[i].max_reviews, cards.filter(card => card.state === 2 && card.due && new Date(card.due) <= today).length) - cstudies.review
   }
 }
 await fetch()
@@ -44,18 +53,18 @@ if (res && !res.error) {
         decks.map((deck) =>
           <tr class="hover:bg-base-300 cursor-pointer">
             <td onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.name}</td>
-            <td onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.new}</td>
+            <td class="text-primary" onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.new}</td>
             <td class="text-warning" onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.learn}</td>
             <td class="text-success" onclick={`window.location.assign("/deck/${deck.id}")`}>{deck.review}</td>
             <td class="w-[10px] py-0!">
               <div class="dropdown">
                 <div tabindex="0" role="button" class="btn btn-square btn-sm btn-ghost sm:btn-md">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20q-.825 0-1.412-.587T10 18t.588-1.412T12 16t1.413.588T14 18t-.587 1.413T12 20m0-6q-.825 0-1.412-.587T10 12t.588-1.412T12 10t1.413.588T14 12t-.587 1.413T12 14m0-6q-.825 0-1.412-.587T10 6t.588-1.412T12 4t1.413.588T14 6t-.587 1.413T12 8"/></svg>
-                </summary>
+                </div>
                 <Dropdown deck={deck.id} />
                 <Settings deck_id={deck.id} />
                 <Delete deck_id={deck.id} />
-              </details>
+              </div>
             </td>
           </tr>
         )
