@@ -5,6 +5,7 @@ import { db, eq, Deck, Card } from "astro:db";
 import { getSession } from "auth-astro/server";
 import Default from "../../../layouts/Default.astro";
 import Overview from "../../../components/deck/Overview.astro";
+import Cards from "../../../components/deck/Cards.astro";
 
 const session = await getSession(Astro.request);
 ---

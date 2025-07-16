@@ -1,24 +1,27 @@
 ---
 export const prerender = false;
 const { deck_id } = Astro.props;
-import { db, Deck } from "astro:db"
+import { db, eq, Deck } from "astro:db"
 import { getSession } from "auth-astro/server"
 import { actions } from "astro:actions"
 const session = await getSession(Astro.request)
 
+const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
+
 ---
 
-<dialog id={`modal_delete_${deck_id}`} class="modal">
+<dialog id={`modal_deck_delete_${deck_id}`} class="modal">
   <div class="modal-box">
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
-    <a class="font-bold text-lg">Delete Deck</a>
+    <a class="font-bold text-lg">Delete {deck.name}?</a>
     <form class="delete-deck-form" action={actions.decks.deleteDeck} method="POST">
       <fieldset class="fieldset w-full">
-        <input value={deck_id} type="hidden" name="user" />
+        <label>This action can't be undone</label>
         <input value={session?.user?.email} type="hidden" name="user" />
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input value={deck_id} type="hidden" name="deck" />
+        <input type="submit" value="Delete" class="btn btn-error" />
       </fieldset>
     </form>
   </div>

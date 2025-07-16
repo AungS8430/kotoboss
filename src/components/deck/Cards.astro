@@ -1,0 +1,36 @@
+---
+const { deck_id } = Astro.props;
+import { db, eq, Deck, Card as CardDB } from "astro:db";
+import { getSession } from "auth-astro/server";
+import Card from "./Card.astro";
+import Create from "../card/Create.astro";
+
+const session = await getSession(Astro.request);
+
+let cards = await db.select().from(CardDB).where(eq(CardDB.deck, deck_id));
+---
+<div>
+  <div class="bg-base-100 rounded-box shadow-md md:w-2xl m-auto gap-2 p-4 flex flex-col text-center justify-center">
+    <h1 class="text-lg font-bold">Cards</h1>
+    <div class="max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-150px)] overflow-y-auto">
+      <table class="table table-sm sm:table-md">
+        <thead>
+          <tr>
+            <th>Front</th>
+            <th>Back</th>
+          </tr>
+        </thead>
+        {
+          cards.map((card, index) => (
+            <Card card_id={card.id} deck_id={deck_id} key={index} card={card} session={session} class="mb-2" />
+          ))
+        }
+      </table>
+    </div>
+    <a class="btn btn-primary" onclick={`modal_card_create_${deck_id}.showModal()`}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2q1.25 0 2.125.875T15 5v6h6q1.25 0 2.125.875T24 14v6q0 1.25-.875 2.125T21 23H5q-1.25 0-2.125-.875T2 20v-6q0-1.25.875-2.125T5 11h6V5q0-1.25.875-2.125T12 2m0 2H5v6h6V4m8 8H5v6h14v-6m0-8H5v4h14V4"/></svg>
+      Create Card
+    </a>
+  </div>
+  <Create deck_id={Astro.props.deck_id} />
+</div>

@@ -1,0 +1,51 @@
+---
+const { deck_id , card_id} = Astro.props;
+import { db, eq, Deck, Card } from "astro:db";
+import { actions } from "astro:actions";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+
+const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0];
+
+if (!deck) {
+  throw new Error("Deck not found");
+}
+
+const card = (await db.select().from(Card).where(eq(Card.id, card_id)))[0];
+
+if (!card) {
+  throw new Error("Card not found");
+} else if (card.deck != deck_id) {
+  throw new Error("Card does not belong to this deck");
+}
+
+if (!session) {
+  throw new Error("You must be logged in to edit a card");
+} else if (session?.user?.email != deck.user) {
+  throw new Error("You do not have permission to add card to this deck");
+}
+---
+<dialog id={`modal_card_edit_${card_id}`} class="modal">
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    <a class="font-bold text-lg">Edit Card</a>
+    <form class="delete-deck-form" action={actions.cards.editCard} method="POST">
+      <fieldset class="fieldset w-full">
+        <label class="label" for="front">Front</label>
+        <input value={card.front} type="text" autocomplete="off" class="input w-full" name="front" />
+        <label class="label" for="back">Back</label>
+        <input value={card.back} type="text" autocomplete="off" class="input w-full" name="back" />
+        <input value={deck_id} type="hidden" name="deck" />
+        <input value={card_id} type="hidden" name="card" />
+        <input value={session?.user?.email} type="hidden" name="user" />
+        <input type="submit" value="Save" class="btn btn-primary" />
+      </fieldset>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

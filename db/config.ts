@@ -13,7 +13,7 @@ const Studies = defineTable({
 
 const Card = defineTable({
   columns: {
-    id: column.number(),
+    id: column.number({ primaryKey: true }),
     deck: column.number(),
     difficulty: column.number(),
     due: column.date(),
@@ -24,7 +24,9 @@ const Card = defineTable({
     scheduled_days: column.number(),
     stability: column.number(),
     state: column.number(),
-    media: column.text({ optional: true })
+    media: column.text({ optional: true }),
+    front: column.text(),
+    back: column.text()
   }
 })
 

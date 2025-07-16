@@ -10,7 +10,7 @@ const session = JSON.stringify(await getSession(Astro.request))
   <data data-session={session} id="session" />
   <div class="flex bg-base-200 h-screen">
     <Menu />
-    <div class="p-4 pt-20 lg:p-8 place-content-center w-full">
+    <div class="p-4 pt-16 lg:p-4 place-content-center w-full">
       <slot />
     </div>
   </div>
