@@ -1,0 +1,12 @@
+---
+const { deck_id } = Astro.params;
+import { getSession } from "auth-astro/server";
+import DeckHandler from "../../../../layouts/DeckHandler.astro";
+import { Study } from "../../../../components/deck/Study";
+
+const session = await getSession(Astro.request);
+---
+
+<DeckHandler deck_id={deck_id}>
+  <Study deck_id={parseInt(deck_id || "0")} user={session?.user?.id || ""} client:load />
+</DeckHandler>

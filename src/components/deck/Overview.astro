@@ -5,50 +5,39 @@ import { getSession } from "auth-astro/server"
 import Heatmap from "./Heatmap.astro"
 import Settings from "./Settings.astro"
 
-let error = null
 const session = await getSession(Astro.request)
 let cards
 let studies
 const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
-if (!deck) {
-  error = "Deck not found"
-} else if (deck.user != session?.user?.email) {
-  error = "Access Denied"
-} else {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  studies = (await db.select().from(Studies).where(eq(Studies.date, today))).find(s => s.deck === deck_id) || { new: 0, learn: 0, review: 0 }
-  cards = await db.select().from(Card).where(eq(Card.deck, deck.id))
-  deck.new = Math.min(deck.max_new_cards, cards.filter(card => card.state === 0).length) - studies.new
-  deck.learn = cards.filter(card => card.state === (1 || 3)).length
-  deck.review = Math.min(deck.max_reviews, cards.filter(card => card.state === 2 && card.due && new Date(card.due) <= today).length) - studies.review
-}
+
+const today = new Date();
+today.setUTCHours(0, 0, 0, 0);
+const tomorrow = new Date(today);
+tomorrow.setUTCDate(today.getUTCDate() + 1);
+studies = (await db.select().from(Studies).where(eq(Studies.date, today))).find(s => s.deck === deck_id) || { new: 0 }
+cards = await db.select().from(Card).where(eq(Card.deck, deck.id))
+deck.new = Math.max(0, Math.min(deck.max_new_cards - studies.new, cards.filter(card => card.state === 0).length))
+deck.learn = cards.filter(card => card.state === (1 || 3)).length
+deck.review = cards.filter(card => card.state === 2 && card.due && new Date(card.due) < tomorrow).length
 ---
 
-{!error ? (
-  <div class="bg-base-100 rounded-box shadow-md md:w-2xl m-auto gap-2 p-4 flex flex-col text-center justify-center">
-    <h1 class="text-lg font-bold">{deck.name}</h1>
-    <p>New: <span class="text-primary">{deck.new}</span> Learning: <span class="text-warning">{deck.learn}</span> Review: <span class="text-success">{deck.review}</span></p>
-    <Heatmap user={session?.user?.email || ""} deck_id={deck_id} />
-    <div class="flex flex-row w-full gap-1">
-      <a class="btn grow" href={`/deck/${deck_id}/cards`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M7 20V8.975q0-.825.6-1.4T9.025 7H20q.825 0 1.413.587T22 9v8l-5 5H9q-.825 0-1.412-.587T7 20M2.025 6.25q-.15-.825.325-1.487t1.3-.813L14.5 2.025q.825-.15 1.488.325t.812 1.3L17.05 5H9Q7.35 5 6.175 6.175T5 9v9.55q-.4-.225-.687-.6t-.363-.85zM20 16h-4v4z"/></svg>
-        Cards
-      </a>
-      <button class="btn grow" onclick={`modal_settings_${deck_id}.showModal()`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M10.825 22q-.675 0-1.162-.45t-.588-1.1L8.85 18.8q-.325-.125-.612-.3t-.563-.375l-1.55.65q-.625.275-1.25.05t-.975-.8l-1.175-2.05q-.35-.575-.2-1.225t.675-1.075l1.325-1Q4.5 12.5 4.5 12.337v-.675q0-.162.025-.337l-1.325-1Q2.675 9.9 2.525 9.25t.2-1.225L3.9 5.975q.35-.575.975-.8t1.25.05l1.55.65q.275-.2.575-.375t.6-.3l.225-1.65q.1-.65.588-1.1T10.825 2h2.35q.675 0 1.163.45t.587 1.1l.225 1.65q.325.125.613.3t.562.375l1.55-.65q.625-.275 1.25-.05t.975.8l1.175 2.05q.35.575.2 1.225t-.675 1.075l-1.325 1q.025.175.025.338v.674q0 .163-.05.338l1.325 1q.525.425.675 1.075t-.2 1.225l-1.2 2.05q-.35.575-.975.8t-1.25-.05l-1.5-.65q-.275.2-.575.375t-.6.3l-.225 1.65q-.1.65-.587 1.1t-1.163.45zM11 20h1.975l.35-2.65q.775-.2 1.438-.587t1.212-.938l2.475 1.025l.975-1.7l-2.15-1.625q.125-.35.175-.737T17.5 12t-.05-.787t-.175-.738l2.15-1.625l-.975-1.7l-2.475 1.05q-.55-.575-1.212-.962t-1.438-.588L13 4h-1.975l-.35 2.65q-.775.2-1.437.588t-1.213.937L5.55 7.15l-.975 1.7l2.15 1.6q-.125.375-.175.75t-.05.8q0 .4.05.775t.175.75l-2.15 1.625l.975 1.7l2.475-1.05q.55.575 1.213.963t1.437.587zm1.05-4.5q1.45 0 2.475-1.025T15.55 12t-1.025-2.475T12.05 8.5q-1.475 0-2.487 1.025T8.55 12t1.013 2.475T12.05 15.5M12 12"/></svg>
-        Settings
-      </button>
-    </div>
-    <button class="btn btn-primary">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M11 17.05V7.2q-1.025-.6-2.175-.9T6.5 6q-.9 0-1.788.175T3 6.7v9.9q.875-.3 1.738-.45T6.5 16q1.175 0 2.288.263T11 17.05m-10 1.1V6.1q0-.275.138-.525T1.55 5.2q1.15-.6 2.4-.9T6.5 4q1.85 0 3.15.425t2.8 1.3q.275.15.413.35T13 6.6v10.45q1.1-.525 2.213-.788T17.5 16q.9 0 1.763.15T21 16.6V5.575q0-.425.288-.713T22 4.575t.713.288t.287.712V18.15q0 .575-.488.875t-1.012.025q-.925-.5-1.937-.775T17.5 18q-1.225 0-2.387.363T12.9 19.375q-.2.125-.437.188t-.463.062t-.462-.062t-.438-.188q-1.05-.65-2.212-1.012T6.5 18q-1.05 0-2.062.275T2.5 19.05q-.525.275-1.012-.025T1 18.15m14.5-5.2V3.725q0-.325.188-.588t.487-.362l1.35-.45q.35-.125.663.113t.312.612v9.225q0 .325-.187.588t-.488.362l-1.35.45q-.35.125-.663-.112t-.312-.613M7 11.525"/></svg>
-      Study
+<div class="bg-base-100 rounded-box shadow-md md:w-2xl m-auto gap-2 p-4 flex flex-col text-center justify-center">
+  <h1 class="text-lg font-bold">{deck.name}</h1>
+  <p>New: <span class="text-primary">{deck.new}</span> Learning: <span class="text-warning">{deck.learn}</span> Review: <span class="text-success">{deck.review}</span></p>
+  <Heatmap user={session?.user?.id || ""} deck_id={deck_id} />
+  <div class="flex flex-row w-full gap-1">
+    <a class="btn grow" href={`/deck/${deck_id}/cards`}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M7 20V8.975q0-.825.6-1.4T9.025 7H20q.825 0 1.413.587T22 9v8l-5 5H9q-.825 0-1.412-.587T7 20M2.025 6.25q-.15-.825.325-1.487t1.3-.813L14.5 2.025q.825-.15 1.488.325t.812 1.3L17.05 5H9Q7.35 5 6.175 6.175T5 9v9.55q-.4-.225-.687-.6t-.363-.85zM20 16h-4v4z"/></svg>
+      Cards
+    </a>
+    <button class="btn grow" onclick={`modal_settings_${deck_id}.showModal()`}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M10.825 22q-.675 0-1.162-.45t-.588-1.1L8.85 18.8q-.325-.125-.612-.3t-.563-.375l-1.55.65q-.625.275-1.25.05t-.975-.8l-1.175-2.05q-.35-.575-.2-1.225t.675-1.075l1.325-1Q4.5 12.5 4.5 12.337v-.675q0-.162.025-.337l-1.325-1Q2.675 9.9 2.525 9.25t.2-1.225L3.9 5.975q.35-.575.975-.8t1.25.05l1.55.65q.275-.2.575-.375t.6-.3l.225-1.65q.1-.65.588-1.1T10.825 2h2.35q.675 0 1.163.45t.587 1.1l.225 1.65q.325.125.613.3t.562.375l1.55-.65q.625-.275 1.25-.05t.975.8l1.175 2.05q.35.575.2 1.225t-.675 1.075l-1.325 1q.025.175.025.338v.674q0 .163-.05.338l1.325 1q.525.425.675 1.075t-.2 1.225l-1.2 2.05q-.35.575-.975.8t-1.25-.05l-1.5-.65q-.275.2-.575.375t-.6.3l-.225 1.65q-.1.65-.587 1.1t-1.163.45zM11 20h1.975l.35-2.65q.775-.2 1.438-.587t1.212-.938l2.475 1.025l.975-1.7l-2.15-1.625q.125-.35.175-.737T17.5 12t-.05-.787t-.175-.738l2.15-1.625l-.975-1.7l-2.475 1.05q-.55-.575-1.212-.962t-1.438-.588L13 4h-1.975l-.35 2.65q-.775.2-1.437.588t-1.213.937L5.55 7.15l-.975 1.7l2.15 1.6q-.125.375-.175.75t-.05.8q0 .4.05.775t.175.75l-2.15 1.625l.975 1.7l2.475-1.05q.55.575 1.213.963t1.437.587zm1.05-4.5q1.45 0 2.475-1.025T15.55 12t-1.025-2.475T12.05 8.5q-1.475 0-2.487 1.025T8.55 12t1.013 2.475T12.05 15.5M12 12"/></svg>
+      Settings
     </button>
-    <Settings deck_id={deck_id} />
   </div>
-) : (
-  <div class="bg-base-100 rounded-box shadow-md md:w-sm m-auto md:py-8 gap-4 p-4 flex flex-col text-center justify-center items-center">
-    <h1 class="text-lg font-bold">{error}</h1>
-    <a class="btn btn-primary w-fit" href="/">Return</a>
-  </div>
-)}
+  <a class="btn btn-primary" href={`/deck/${deck_id}/study`}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M11 17.05V7.2q-1.025-.6-2.175-.9T6.5 6q-.9 0-1.788.175T3 6.7v9.9q.875-.3 1.738-.45T6.5 16q1.175 0 2.288.263T11 17.05m-10 1.1V6.1q0-.275.138-.525T1.55 5.2q1.15-.6 2.4-.9T6.5 4q1.85 0 3.15.425t2.8 1.3q.275.15.413.35T13 6.6v10.45q1.1-.525 2.213-.788T17.5 16q.9 0 1.763.15T21 16.6V5.575q0-.425.288-.713T22 4.575t.713.288t.287.712V18.15q0 .575-.488.875t-1.012.025q-.925-.5-1.937-.775T17.5 18q-1.225 0-2.387.363T12.9 19.375q-.2.125-.437.188t-.463.062t-.462-.062t-.438-.188q-1.05-.65-2.212-1.012T6.5 18q-1.05 0-2.062.275T2.5 19.05q-.525.275-1.012-.025T1 18.15m14.5-5.2V3.725q0-.325.188-.588t.487-.362l1.35-.45q.35-.125.663.113t.312.612v9.225q0 .325-.187.588t-.488.362l-1.35.45q-.35.125-.663-.112t-.312-.613M7 11.525"/></svg>
+    Study
+  </a>
+  <Settings deck_id={deck_id} />
+</div>

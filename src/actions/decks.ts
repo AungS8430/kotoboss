@@ -24,7 +24,7 @@ export const decks = {
       }
       const updatedDecks = await db
         .insert(Deck)
-        .values({ name: name, user: user, max_new_cards: 50, max_reviews: 500 })
+        .values({ name: name, user: user, max_new_cards: 50 })
         .returning();
       return { data: updatedDecks };
     }
@@ -35,10 +35,9 @@ export const decks = {
       user: z.string(),
       deck: z.number(),
       name: z.string(),
-      max_reviews: z.number(),
       max_new_cards: z.number()
     }),
-    handler: async ({user, deck, name, max_reviews, max_new_cards}) => {
+    handler: async ({user, deck, name, max_new_cards}) => {
       const orgDeck = (await db.select().from(Deck).where(eq(Deck.id, deck)))[0]
       if (orgDeck.user != user) {
         throw new ActionError({
@@ -54,7 +53,7 @@ export const decks = {
       }
       const updatedDeck = await db
         .update(Deck)
-        .set({ name: name, max_new_cards: max_new_cards, max_reviews: max_reviews })
+        .set({ name: name, max_new_cards: max_new_cards })
         .where(eq(Deck.id, deck));
       return { updatedDeck };
     }

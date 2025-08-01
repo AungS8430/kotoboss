@@ -6,9 +6,15 @@ const Studies = defineTable({
     user: column.text(),
     date: column.date(),
     count: column.number(),
-    new: column.number(),
-    review: column.number()
-  }
+    new: column.number()
+  },
+  indexes: [
+    {
+      on: ["deck", "date", "user"],
+      unique: true,
+      name: "id"
+    }
+  ]
 })
 
 const Card = defineTable({
@@ -16,6 +22,7 @@ const Card = defineTable({
     id: column.number({ primaryKey: true }),
     deck: column.number(),
     difficulty: column.number(),
+    elapsed_days: column.number(),
     due: column.date(),
     lapses: column.number(),
     last_review: column.date({ optional: true }),
@@ -36,7 +43,6 @@ const Deck = defineTable({
     user: column.text(),
     name: column.text(),
     max_new_cards: column.number(),
-    max_reviews: column.number(),
   }
 })
 

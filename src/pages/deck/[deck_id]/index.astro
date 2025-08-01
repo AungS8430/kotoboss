@@ -3,17 +3,13 @@ export const prerender = false;
 const { deck_id } = Astro.params;
 import { db, eq, Deck, Card } from "astro:db";
 import { getSession } from "auth-astro/server";
-import Default from "../../../layouts/Default.astro";
+import DeckHandler from "../../../layouts/DeckHandler.astro";
 import Overview from "../../../components/deck/Overview.astro";
 import Cards from "../../../components/deck/Cards.astro";
 
 const session = await getSession(Astro.request);
 ---
 
-{!session ? (
-  <script>window.location.replace("/")</script>
-) : (
-  <Default>
-    <Overview deck_id={deck_id} />
-  </Default>
-)}
+<DeckHandler deck_id={deck_id}>
+  <Overview deck_id={deck_id} />
+</DeckHandler>

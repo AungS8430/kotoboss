@@ -1,6 +1,6 @@
 ---
 import Landing from "../layouts/Landing.astro";
-import Default from "../layouts/Default.astro";
+import UserHandler from "../layouts/UserHandler.astro";
 import Decks from "../components/deck/Decks.astro";
 import { getSession } from 'auth-astro/server';
 
@@ -17,7 +17,7 @@ const session = await getSession(Astro.request)
 		</div>
 	</Landing>
 ) : (
-	<Default>
+	<UserHandler>
 		<Decks />
-	</Default>
+	</UserHandler>
 )}

@@ -1,0 +1,26 @@
+---
+const { deck_id } = Astro.params
+import { db, eq, Deck } from "astro:db"
+import { getSession } from "auth-astro/server"
+import UserHandler from "./UserHandler.astro"
+
+const session = await getSession(Astro.request);
+
+const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
+
+let error = null;
+
+if (!deck) error = "Deck not found";
+else if (deck.user != session?.user?.id) error = "Access Denied"
+---
+
+<UserHandler>
+  {error ? (
+    <div class="bg-base-100 rounded-box shadow-md md:w-sm m-auto md:py-8 gap-2 p-2 flex flex-col text-center justify-center items-center">
+      <h1 class="text-lg font-bold">{error}</h1>
+      <a class="btn btn-primary w-fit" href="/">Return</a>
+    </div>
+  ) : (
+    <slot />
+  )}
+</UserHandler>

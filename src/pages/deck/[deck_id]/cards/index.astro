@@ -1,5 +1,5 @@
 ---
-import Overview from "../../../../components/deck/Overview.astro";
+import DeckHandler from "../../../../layouts/DeckHandler.astro";
 const { deck_id } = Astro.params;
 import { db, eq, Deck, Card } from "astro:db";
 import { getSession } from "auth-astro/server";
@@ -11,10 +11,7 @@ const session = await getSession(Astro.request);
 const deck = await db.select().from(Deck).where(eq(Deck.id, deck_id));
 
 ---
-{!session ? (
-  <script>window.location.replace("/")</script>
-) : (
-  <Default>
-    <Cards deck_id={deck_id} />
-  </Default>
-)}
+
+<DeckHandler deck_id={deck_id}>
+  <Cards deck_id={deck_id} />
+</DeckHandler>

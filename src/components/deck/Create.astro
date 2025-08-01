@@ -15,7 +15,7 @@ const session = await getSession(Astro.request)
     <a class="font-bold text-lg">Create Deck</a>
     <form class="create-deck-form" action={actions.decks.createDeck} method="POST">
       <fieldset class="fieldset w-full">
-        <input value={session?.user?.email} type="hidden" name="user" />
+        <input value={session?.user?.id} type="hidden" name="user" />
         <label class="label" for="name">Name</label>
         <input type="text" autocomplete="off" class="input w-full" placeholder="Type here" name="name" maxlength="40" required />
         <input type="submit" value="Create" class="btn btn-primary" />
