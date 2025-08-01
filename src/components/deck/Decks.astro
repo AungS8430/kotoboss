@@ -28,7 +28,7 @@ async function fetch() {
     decks[i].review = cards.filter(card => card.state === 2 && card.due && new Date(card.due) <= today).length
   }
 }
-await fetch()
+//await fetch()
 
 ---
 
