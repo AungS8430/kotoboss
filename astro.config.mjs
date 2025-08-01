@@ -8,7 +8,7 @@ import db from '@astrojs/db';
 import tailwindcss from '@tailwindcss/vite';
 
 import auth from 'auth-astro';
-import vercel from "@astrojs/vercel/serverless"
+import vercelServerless from "@astrojs/vercel/serverless"
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,7 +18,7 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
   output: "server",
-  adapter: vercel({
+  adapter: vercelServerless({
     webAnalytics: {
       enabled: true
     },
