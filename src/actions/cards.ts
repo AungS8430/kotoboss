@@ -32,7 +32,7 @@ export const cards = {
       }
       const updatedCards = await db
         .insert(Card)
-        .values({ deck: deck, difficulty: 1, due: new Date('2099-12-31'), lapses: 0, learning_steps: 1, reps: 0, scheduled_days: 1, stability: 1, state: 0, front: front, back: back })
+        .values({ deck: deck, difficulty: 1, due: new Date('2099-12-31'), lapses: 0, elapsed_days: 0, learning_steps: 1, reps: 0, scheduled_days: 1, stability: 1, state: 0, front: front, back: back })
         .returning();
       return { data: updatedCards };
     }
