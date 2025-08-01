@@ -8,19 +8,18 @@ import Settings from "./Settings.astro";
 import Delete from "./Delete.astro";
 
 const session = await getSession(Astro.request);
-const res = await Astro.getActionResult(actions.decks.createDeck) || await Astro.getActionResult(actions.decks.editDeck);
+const user = session?.user?.id || "";
+//const res = Astro.getActionResult(actions.decks.createDeck) || Astro.getActionResult(actions.decks.editDeck);
 
-let decks = null
+let decks: { user: string, id: number, name: string, max_new_cards: number, new?: number, learn?: number, review?: number }[] = [];
 const today = new Date();
 today.setUTCHours(0, 0, 0, 0);
 const yyyy = today.getFullYear();
 const mm = String(today.getMonth() + 1).padStart(2, '0');
 const dd = String(today.getDate()).padStart(2, '0');
-const todayStr = `${yyyy}-${mm}-${dd}`;
-
 
 async function fetch() {
-  decks = await db.select().from(Deck).where(eq(Deck.user, session?.user?.id))
+  // decks = await db.select().from(Deck).where(eq(Deck.user, user))
   let studies = await db.select().from(Studies).where(eq(Studies.date, today))
   for (let i = 0; i < decks.length; i++) {
     let cards = await db.select().from(Card).where(eq(Card.deck, decks[i].id))
@@ -32,7 +31,7 @@ async function fetch() {
 }
 await fetch()
 
-if (res && !res.error) {
+if (true) {
   await fetch()
 }
 ---
