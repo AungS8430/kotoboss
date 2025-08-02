@@ -41,7 +41,7 @@ export const study = {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
       let cards = await db.select().from(Card).where(and(eq(Card.deck, deck_id), lt(Card.due, tomorrow))).orderBy(Card.due, Card.stability, Card.difficulty);
-      const studies = (await db.select().from(Studies).where(and(eq(Studies.deck, deck_id), eq(Studies.user, user), eq(Studies.date, today))))[0];
+      const studies = (await db.select().from(Studies).where(and(eq(Studies.deck, deck_id), eq(Studies.user, user), eq(Studies.date, today))))[0] || { new: 0 };
       if (cards.length === 0) {
         cards = await db.select().from(Card).where(and(eq(Card.deck, deck_id), eq(Card.state, 0))).limit(deck.max_new_cards - studies.new).orderBy(Card.id);
         state = 1
