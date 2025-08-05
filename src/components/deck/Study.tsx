@@ -61,6 +61,23 @@ export const Study = ({ deck_id, user }: { deck_id: number; user: string }) => {
       }
     });
   }, [deck_id, user]);
+  useEffect(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && toggle) {
+        studyAction(2);
+      } else if (e.key === " " && !toggle) {
+        setToggle(true);
+      } else if (e.key === "1" && toggle) {
+        studyAction(0);
+      } else if (e.key === "2" && toggle) {
+        studyAction(1);
+      } else if (e.key === "3" && toggle) {
+        studyAction(2);
+      } else if (e.key === "4" && toggle) {
+        studyAction(3);
+      }
+    })
+  }, [toggle, studyAction]);
   return (
     <div className="bg-base-100 rounded-box shadow-md md:w-2xl h-[80vh] m-auto gap-4 p-4 flex flex-col text-center justify-center">
       <h1 className="font-bold text-neutral-400">Studying {deckName}</h1>
@@ -78,16 +95,31 @@ export const Study = ({ deck_id, user }: { deck_id: number; user: string }) => {
           {toggle ? (
             <div>
               <div className="flex justify-center gap-2">
-                <button onClick={() => studyAction(0)} className="btn text-red-500 btn-soft">Again</button>
-                <button onClick={() => studyAction(1)} className="btn text-yellow-500 btn-soft">Hard</button>
-                <button onClick={() => studyAction(2)} className="btn text-green-500 btn-soft">Good</button>
-                <button onClick={() => studyAction(3)} className="btn text-blue-500 btn-soft">Easy</button>
+                <button onClick={() => studyAction(0)} className="btn text-red-500 btn-soft">
+                  <kbd className="kbd">1</kbd>
+                  Again
+                </button>
+                <button onClick={() => studyAction(1)} className="btn text-yellow-500 btn-soft">
+                  <kbd className="kbd">2</kbd>
+                  Hard
+                </button>
+                <button onClick={() => studyAction(2)} className="btn text-green-500 btn-soft">
+                  <kbd className="kbd">3</kbd>
+                  Good
+                </button>
+                <button onClick={() => studyAction(3)} className="btn text-blue-500 btn-soft">
+                  <kbd className="kbd">4</kbd>
+                  Easy
+                </button>
               </div>
             </div>
           ) : (
             <div>
               <div className="flex justify-center">
-                <button onClick={() => setToggle(true)} className="btn btn-soft text-white">Flip</button>
+                <button onClick={() => setToggle(true)} className="btn btn-soft text-white">
+                  <kbd className="kbd">␣</kbd>
+                  Flip
+                </button>
               </div>
             </div>
           )}
