@@ -24,7 +24,7 @@ deck.review = cards.filter(card => card.state === 2 && card.due && new Date(card
 <div class="bg-base-100 rounded-box shadow-md md:w-2xl m-auto gap-2 p-4 flex flex-col text-center justify-center">
   <h1 class="text-lg font-bold">{deck.name}</h1>
   <p>New: <span class="text-primary">{deck.new}</span> Learning: <span class="text-warning">{deck.learn}</span> Review: <span class="text-success">{deck.review}</span></p>
-  <Heatmap user={session?.user?.id || ""} deck_id={deck_id} />
+  <Heatmap user={session?.user?.email || ""} deck_id={deck_id} />
   <div class="flex flex-row w-full gap-1">
     <a class="btn grow" href={`/deck/${deck_id}/cards`}>
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M7 20V8.975q0-.825.6-1.4T9.025 7H20q.825 0 1.413.587T22 9v8l-5 5H9q-.825 0-1.412-.587T7 20M2.025 6.25q-.15-.825.325-1.487t1.3-.813L14.5 2.025q.825-.15 1.488.325t.812 1.3L17.05 5H9Q7.35 5 6.175 6.175T5 9v9.55q-.4-.225-.687-.6t-.363-.85zM20 16h-4v4z"/></svg>

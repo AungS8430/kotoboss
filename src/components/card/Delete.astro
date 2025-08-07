@@ -18,7 +18,7 @@ const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0];
 
 if (!session) {
   throw new Error("You must be logged in to edit a card");
-} else if (session?.user?.id != deck.user) {
+} else if (session?.user?.email != deck.user) {
   throw new Error("You do not have permission to edit this card");
 }
 ---
@@ -33,7 +33,7 @@ if (!session) {
         <label>This action can't be undone.</label>
         <input value={deck_id} type="hidden" name="deck" />
         <input value={card_id} type="hidden" name="card" />
-        <input value={session?.user?.id} type="hidden" name="user" />
+        <input value={session?.user?.email} type="hidden" name="user" />
         <input type="submit" value="Delete" class="btn btn-error" />
       </fieldset>
     </form>

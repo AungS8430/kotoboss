@@ -19,7 +19,7 @@ const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
     <form class="delete-deck-form" action={actions.decks.deleteDeck} method="POST">
       <fieldset class="fieldset w-full">
         <label>This action can't be undone</label>
-        <input value={session?.user?.id} type="hidden" name="user" />
+        <input value={session?.user?.email} type="hidden" name="user" />
         <input value={deck_id} type="hidden" name="deck" />
         <input type="submit" value="Delete" class="btn btn-error" />
       </fieldset>

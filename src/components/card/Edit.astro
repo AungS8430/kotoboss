@@ -22,7 +22,7 @@ if (!card) {
 
 if (!session) {
   throw new Error("You must be logged in to edit a card");
-} else if (session?.user?.id != deck.user) {
+} else if (session?.user?.email != deck.user) {
   throw new Error("You do not have permission to add card to this deck");
 }
 ---
@@ -40,7 +40,7 @@ if (!session) {
         <input value={card.back} type="text" autocomplete="off" class="input w-full" name="back" />
         <input value={deck_id} type="hidden" name="deck" />
         <input value={card_id} type="hidden" name="card" />
-        <input value={session?.user?.id} type="hidden" name="user" />
+        <input value={session?.user?.email} type="hidden" name="user" />
         <input type="submit" value="Save" class="btn btn-primary" />
       </fieldset>
     </form>

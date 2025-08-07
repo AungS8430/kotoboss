@@ -11,7 +11,7 @@ const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
 let error = null;
 
 if (!deck) error = "Deck not found";
-else if (deck.user != session?.user?.id) error = "Access Denied"
+else if (deck.user != session?.user?.email) error = "Access Denied"
 ---
 
 <UserHandler>

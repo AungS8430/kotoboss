@@ -8,5 +8,5 @@ const session = await getSession(Astro.request);
 ---
 
 <DeckHandler deck_id={deck_id}>
-  <Study deck_id={parseInt(deck_id || "0")} user={session?.user?.id || ""} client:load />
+  <Study deck_id={parseInt(deck_id || "0")} user={session?.user?.email || ""} client:load />
 </DeckHandler>

@@ -22,7 +22,7 @@ const deck = (await db.select().from(Deck).where(eq(Deck.id, deck_id)))[0]
         <input value={deck.name} type="text" autocomplete="off" class="input w-full" placeholder="Type here" name="name" maxlength="40" />
         <label class="label" for="max_new_cards">Max new cards per day</label>
         <input value={deck.max_new_cards} autocomplete="off" type="number" class="input w-full" id="max_new_cards" name="max_new_cards" min="0" step="1" inputmode="numeric" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-        <input value={session?.user?.id} type="hidden" name="user" />
+        <input value={session?.user?.email} type="hidden" name="user" />
         <input value={deck_id} type="hidden" name="deck" />
         <input type="submit" value="Save" class="btn btn-primary" />
       </fieldset>
