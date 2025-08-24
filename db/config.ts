@@ -6,7 +6,11 @@ const Studies = defineTable({
     user: column.text(),
     date: column.date(),
     count: column.number(),
-    new: column.number()
+    new: column.number(),
+    learning: column.number(),
+    relearning: column.number(),
+    young: column.number(),
+    mature: column.number(),
   },
   indexes: [
     {

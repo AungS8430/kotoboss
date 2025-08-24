@@ -85,13 +85,15 @@ export const study = {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const card = (await db.select().from(Card).where(and(eq(Card.deck, deck_id), eq(Card.id, card_id))))[0];
+      const card = (await db.select().from(Card).where(and(eq(Card.deck, deck_id), eq(Card.id, card_id))))[0]
+      let ncard: CardType = createEmptyCard();
 
       let fsrsCard: CardInput = card;
       const params: FSRSParameters = generatorParameters();
       const f: FSRS = new FSRS(params);
       await f.next(fsrsCard, new Date(), grade, (async (R: RecordLogItem) => {
         await db.update(Card).set(R.card).where(and(eq(Card.id, card.id), eq(Card.deck, deck_id)));
+        ncard = R.card;
       }))
 
       // Update studies
@@ -101,7 +103,11 @@ export const study = {
         await db.update(Studies)
           .set({
             count: studies.count + 1,
-            new: card.state === 0 ? studies.new + 1 : studies.new
+            new: card.state === 0 ? studies.new + 1 : studies.new,
+            learning: ncard.state === 1 ? studies.learning + 1 : studies.learning,
+            relearning: ncard.state === 3 ? studies.relearning + 1 : studies.relearning,
+            young: ncard.state === 2 && ncard.scheduled_days < 21 ? studies.young + 1 : studies.young,
+            mature: ncard.state === 2 && ncard.scheduled_days >= 21 ? studies.mature + 1 : studies.mature
           })
           .where(and(eq(Studies.deck, deck_id), eq(Studies.user, user), eq(Studies.date, today)));
       } else {
@@ -111,7 +117,11 @@ export const study = {
             user,
             count: 1,
             date: today,
-            new: card.state === 0 ? 1 : 0
+            new: card.state === 0 ? 1 : 0,
+            learning: ncard.state === 1 ? 1 : 0,
+            relearning: ncard.state === 3 ? 1 : 0,
+            young: ncard.state === 2 && ncard.scheduled_days < 21 ? 1 : 0,
+            mature: ncard.state === 2 && ncard.scheduled_days >= 21 ? 1 : 0
           })
       }
 

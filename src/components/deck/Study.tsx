@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { actions} from "astro:actions";
+import { actions } from "astro:actions";
 
 interface CardObject {
   id: number;

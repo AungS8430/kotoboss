@@ -1,0 +1,11 @@
+---
+import UserHandler from "../../layouts/UserHandler.astro";
+import { Stats } from "../../components/stats/Stats";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+---
+
+<UserHandler>
+  <Stats user={session?.user?.email} client:only />
+</UserHandler>
