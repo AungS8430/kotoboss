@@ -24,6 +24,7 @@ export const Study = ({ deck_id, user }: { deck_id: number; user: string }) => {
   const [toggle, setToggle] = useState(false);
   const [status, setStatus] = useState<number>(0);
   const [studies, setStudies] = useState<{ learn: number, review: number, new: number }>({ learn: 0, review: 0, new: 0 });
+  const [activeState, setActiveState] = useState<"new" | "learn" | "review" | null>(null);
 
   async function fetchCards() {
     await actions.study.fetchCard({ deck_id: deck_id, user: user }).then((res) => {
@@ -31,38 +32,37 @@ export const Study = ({ deck_id, user }: { deck_id: number; user: string }) => {
         setCard(res?.data?.card);
         setStatus(res?.data?.status);
 
-        document.getElementById("snew")?.style.setProperty("text-decoration", "none");
-        document.getElementById("slearn")?.style.setProperty("text-decoration", "none");
-        document.getElementById("sreview")?.style.setProperty("text-decoration", "none");
-        if (res?.data?.card.state === 0) document.getElementById("snew")?.style.setProperty("text-decoration", "underline");
-        if (res?.data?.card.state === (1 || 3)) document.getElementById("slearn")?.style.setProperty("text-decoration", "underline");
-        if (res?.data?.card.state === 2) document.getElementById("sreview")?.style.setProperty("text-decoration", "underline");
+        if (res?.data?.card.state === 0) setActiveState("new");
+        if (res?.data?.card.state === 1 || res?.data?.card.state === 3) setActiveState("learn");
+        if (res?.data?.card.state === 2) setActiveState("review");
       }
-    })
+    });
     await actions.study.fetchStudies({ user: user, deck_id: deck_id }).then((res) => {
       if (res.data) {
         setStudies(res.data);
       }
-    })
+    });
   }
+
   async function studyAction(grade: number) {
     if (!card) return;
 
-    await actions.study.studyAction({ user: user, deck_id: deck_id, card_id: card.id, grade: grade}).then((res) => {
-      fetchCards();
-      setToggle(false)
-    })
+    await actions.study.studyAction({ user: user, deck_id: deck_id, card_id: card.id, grade: grade });
+    fetchCards();
+    setToggle(false);
   }
+
   useEffect(() => {
-    fetchCards()
+    fetchCards();
     actions.study.fetchDeckName({ deck_id: deck_id, user: user }).then((res) => {
       if (res.data) {
         setDeckName(res.data);
       }
     });
   }, [deck_id, user]);
+
   useEffect(() => {
-    window.addEventListener("keydown", (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" && toggle) {
         studyAction(2);
       } else if (e.key === " " && !toggle) {
@@ -76,8 +76,14 @@ export const Study = ({ deck_id, user }: { deck_id: number; user: string }) => {
       } else if (e.key === "4" && toggle) {
         studyAction(3);
       }
-    })
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [toggle, studyAction]);
+
   return (
     <div className="bg-base-100 rounded-box shadow-md md:w-2xl h-[80vh] m-auto gap-4 p-4 flex flex-col text-center justify-center">
       <h1 className="font-bold text-neutral-400">Studying {deckName}</h1>
@@ -123,15 +129,18 @@ export const Study = ({ deck_id, user }: { deck_id: number; user: string }) => {
               </div>
             </div>
           )}
-
         </div>
       ) : (
         <p className="grow place-content-center">{status === -1 ? "Studies finished for today :)" : "Loading..."}</p>
       )}
 
       <div className="bg-base-300 p-2 rounded-md">
-        <p><span className="text-primary" id="snew">{studies.new}</span> <span className="text-warning" id="slearn">{studies.learn}</span> <span className="text-success" id="sreview">{studies.review}</span></p>
+        <p className="flex gap-1 justify-center">
+          <span className={`text-primary ${activeState === "new" ? "underline" : ""}`} id="snew">{studies.new}</span>
+          <span className={`text-warning ${activeState === "learn" ? "underline" : ""}`} id="slearn">{studies.learn}</span>
+          <span className={`text-success ${activeState === "review" ? "underline" : ""}`} id="sreview">{studies.review}</span>
+        </p>
       </div>
     </div>
-  )
-}
+  );
+};

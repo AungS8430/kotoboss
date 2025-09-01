@@ -104,10 +104,10 @@ export const study = {
           .set({
             count: studies.count + 1,
             new: card.state === 0 ? studies.new + 1 : studies.new,
-            learning: ncard.state === 1 ? studies.learning + 1 : studies.learning,
+            learning: card.state === 1 ? studies.learning + 1 : studies.learning,
             relearning: ncard.state === 3 ? studies.relearning + 1 : studies.relearning,
-            young: ncard.state === 2 && ncard.scheduled_days < 21 ? studies.young + 1 : studies.young,
-            mature: ncard.state === 2 && ncard.scheduled_days >= 21 ? studies.mature + 1 : studies.mature
+            young: card.state === 2 && card.scheduled_days < 21 ? studies.young + 1 : studies.young,
+            mature: card.state === 2 && card.scheduled_days >= 21 ? studies.mature + 1 : studies.mature
           })
           .where(and(eq(Studies.deck, deck_id), eq(Studies.user, user), eq(Studies.date, today)));
       } else {
@@ -118,10 +118,10 @@ export const study = {
             count: 1,
             date: today,
             new: card.state === 0 ? 1 : 0,
-            learning: ncard.state === 1 ? 1 : 0,
-            relearning: ncard.state === 3 ? 1 : 0,
-            young: ncard.state === 2 && ncard.scheduled_days < 21 ? 1 : 0,
-            mature: ncard.state === 2 && ncard.scheduled_days >= 21 ? 1 : 0
+            learning: card.state === 1 ? 1 : 0,
+            relearning: card.state === 3 ? 1 : 0,
+            young: card.state === 2 && card.scheduled_days < 21 ? 1 : 0,
+            mature: card.state === 2 && card.scheduled_days >= 21 ? 1 : 0
           })
       }
 

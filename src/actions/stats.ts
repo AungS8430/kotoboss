@@ -1,4 +1,4 @@
-import { db, and, eq, sum, Deck, Studies } from "astro:db";
+import { db, and, eq, sum, Deck, Card, Studies } from "astro:db";
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -58,6 +58,76 @@ export const stats = {
         }));
         return { data: normalizedStudies };
       }
+    }
+  }),
+  getScheduled: defineAction({
+    input: z.object({
+      user: z.string(),
+      deck: z.number().optional(),
+    }),
+    handler: async ({ user, deck }) => {
+      if (!user) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "User not logged in."
+        });
+      }
+
+      const decksData = await db.select().from(Deck).where(eq(Deck.user, user));
+      const decks = decksData.map(d => d.id);
+
+      let cardsQuery;
+      if (deck) {
+        cardsQuery = await db.select().from(Card).where(eq(Card.deck, deck));
+      } else {
+        cardsQuery = (await db.select().from(Card)).filter(card => decks.includes(card.deck));
+      }
+
+      cardsQuery.sort((a, b) => a.due < b.due ? -1 : 1);
+
+      // Map each date to the count of cards due on that date
+      const groupedCounts = cardsQuery.reduce((acc: Record<string, number>, card) => {
+        const dueDate = card.due.toISOString().split('T')[0];
+        acc[dueDate] = (acc[dueDate] || 0) + 1;
+        return acc;
+      }, {});
+
+      return { data: groupedCounts };
+    }
+  }),
+  getCardCounts: defineAction({
+    input: z.object({
+      user: z.string(),
+      deck: z.number().optional(),
+    }),
+    handler: async ({ user, deck }) => {
+      if (!user) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "User not logged in."
+        });
+      }
+
+      const decksData = await db.select().from(Deck).where(eq(Deck.user, user));
+      const decks = decksData.map(d => d.id);
+
+      let cardsQuery;
+      if (deck) {
+        cardsQuery = await db.select().from(Card).where(eq(Card.deck, deck));
+      } else {
+        cardsQuery = (await db.select().from(Card)).filter(card => decks.includes(card.deck));
+      }
+
+      const now = new Date();
+      const counts = {
+        new: cardsQuery.filter(c => c.state == 0).length,
+        learning: cardsQuery.filter(c => c.state == 1).length,
+        relearning: cardsQuery.filter(c => c.state == 3).length,
+        young: cardsQuery.filter(c => c.state == 2 && c.scheduled_days < 21).length,
+        mature: cardsQuery.filter(c => c.state == 2 && c.scheduled_days >= 21).length,
+      };
+
+      return { data: counts };
     }
   })
 }
