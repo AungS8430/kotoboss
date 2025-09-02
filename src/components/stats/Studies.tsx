@@ -38,6 +38,7 @@ export const Studies = ({ user, curr }: { user: string, curr: { id: number; name
     await actions.stats.getStudies({ user: user, deck: deckId }).then((res) => {
       if (res.data) {
         setStudies(res.data.data);
+        // console.log(res.data)
       }
     })
   }
@@ -49,6 +50,7 @@ export const Studies = ({ user, curr }: { user: string, curr: { id: number; name
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
+    console.log(endDate);
     return dates;
   }
 
@@ -63,7 +65,7 @@ export const Studies = ({ user, curr }: { user: string, curr: { id: number; name
     };
     const categories: any[] = [];
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
     const start = studies.length > 0 ? new Date(studies[0].date) : today;
     for (const date of generateDateRange(start, today)) {
       const formattedDate = date.toISOString().split('T')[0];
@@ -78,7 +80,7 @@ export const Studies = ({ user, curr }: { user: string, curr: { id: number; name
       (seriesData.young as number[]).push(study ? study.young : 0);
       (seriesData.mature as number[]).push(study ? study.mature : 0);
     }
-    console.log(seriesData);
+    // console.log(seriesData);
     setStudiesChart({
       series: [
         { name: "New", data: seriesData.new },
