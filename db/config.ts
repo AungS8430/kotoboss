@@ -5,12 +5,12 @@ const Studies = defineTable({
     deck: column.number(),
     user: column.text(),
     date: column.date(),
-    count: column.number(),
-    new: column.number(),
-    learning: column.number(),
-    relearning: column.number(),
-    young: column.number(),
-    mature: column.number(),
+    count: column.number({ default: 0 }),
+    new: column.number({ default: 0 }),
+    learning: column.number({ default: 0 }),
+    relearning: column.number({ default: 0 }),
+    young: column.number({ default: 0 }),
+    mature: column.number({ default: 0 }),
   },
   indexes: [
     {
